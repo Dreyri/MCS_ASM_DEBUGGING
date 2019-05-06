@@ -23,7 +23,7 @@ START:	LDS	#STACK		  	; Stackpointer
 	JSR	SetUp		  	; System SetUp
 
 INIT:	MOVB 	#0b11110000,DDRS	; PortS Bits7..4 = Ausgang
-	LDX	Phasen			; Zeiger auf Bitmuster-Phase 1 & 2
+	LDX	#Phasen			; Zeiger auf Bitmuster-Phase 1 & 2, Lade pointer in X
 
 
 

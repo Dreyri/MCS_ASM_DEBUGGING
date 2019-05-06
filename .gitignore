@@ -1,0 +1,11 @@
+*._s
+*.o
+*.dbg
+*.mak
+*.map
+*.mp
+*.dp2
+*.s19
+*.lk
+*.lis
+*.lst

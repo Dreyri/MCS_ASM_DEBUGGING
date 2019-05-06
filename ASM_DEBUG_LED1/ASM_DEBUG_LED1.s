@@ -26,7 +26,7 @@ START:	LDS     #STACK		; Stackpointer
 MAIN:	LDX     #4
 	LDAA    #0b00001000
 LOOP:	LSLA 
-	STAA    PortS			  
+	STAA    PORTS			  
 	JSR     WARTEN		; Warteroutine aufrufen	 
 	DBNE    X,LOOP		; 1 Zyklus des Lauflichtes fertig? 
 	JMP     MAIN		; Wiederholen (Closed Loop)  

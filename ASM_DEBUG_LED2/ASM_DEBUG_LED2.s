@@ -29,8 +29,8 @@ INIT:	MOVB 	#0b11110000,DDRS	; PortS Bits7..4 = Ausgang
 
 MAIN:  	LDAA	0,X			; 1. Phase Laden
 	STAA	PortS           	; Ausgabe Bitmuster auf PortS
-        JMP	WAIT			; 500ms warten
-	LDAA    0,X			; 2. Phase Laden
+        JSR	WAIT			; 500ms warten, has to be subroutine jump
+	LDAA    1,X			; 2. Phase Laden, Lade 2e Phase durch offset
 	STAA	PortS          		; Ausgabe Bitmuster auf PortS 
 	JMP	WAIT			; 500ms warten		       
 	BRA     MAIN           		; Wiederholen (Close Loop)

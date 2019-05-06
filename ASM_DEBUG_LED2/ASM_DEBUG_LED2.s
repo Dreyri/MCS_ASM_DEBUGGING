@@ -9,7 +9,7 @@ SetUp	=	$F800		; Suboutine System SetUp
 ; User Support:		
 LCD4x20A=	SetUp+3		; Subroutine LCD4x20A (Version Assembler)
 VoltAnz	=	SetUp+6		; Subroutine VoltAnz  (Ausgabe "#,##V")
-Warte1ms=	SetUp+9		; Subroutine Warte1ms (Verzögerungszeit tv=1ms)
+Warte1ms=	SetUp+9		; Subroutine Warte1ms (VerzÃ¶gerungszeit tv=1ms)
 
 ; **********************************************************************************
 
@@ -32,12 +32,12 @@ MAIN:  	LDAA	0,X			; 1. Phase Laden
         JSR	WAIT			; 500ms warten, has to be subroutine jump
 	LDAA    1,X			; 2. Phase Laden, Lade 2e Phase durch offset
 	STAA	PortS          		; Ausgabe Bitmuster auf PortS 
-	JMP	WAIT			; 500ms warten		       
+	JSR	WAIT			; 500ms warten		       
 	BRA     MAIN           		; Wiederholen (Close Loop)
 	
 
 WAIT:	LDY	#500			; 500ms
-WLOOP:	JSR	Warte1ms	        ; Ablauf Verzögerungszeit
+WLOOP:	JSR	Warte1ms	        ; Ablauf VerzÃ¶gerungszeit
 		DBNE Y,WLOOP		; 500 x 1ms, fertig ?
 		RTS			; Abschluss Subroutine
 
@@ -45,8 +45,8 @@ WLOOP:	JSR	Warte1ms	        ; Ablauf Verzögerungszeit
 ; **********************************************************************************		
 ; Konstanten
 
-Phasen:	.DB	0b01010000	; Bits für Blinkphase 1 
-	.DB	0b10100000	; Bits für Blinkphase 2 
+Phasen:	.DB	0b01010000	; Bits fÃ¼r Blinkphase 1 
+	.DB	0b10100000	; Bits fÃ¼r Blinkphase 2 
 
 
 ; **********************************************************************************

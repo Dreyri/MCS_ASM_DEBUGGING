@@ -20,7 +20,7 @@ DDRS	=	0x024A
         .ORG   	$4000		; ASM Code ab 0x4000
 START:	LDS     #STACK		; Stackpointer
  	JSR     SetUp		; System SetUp
-	MOVB    #0xF0           ; Set PS4-7 to output
+	MOVB    #$F0,DDRS           ; Set PS4-7 to output
 
 	
 		

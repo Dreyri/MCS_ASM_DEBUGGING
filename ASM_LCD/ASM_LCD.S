@@ -44,6 +44,12 @@ SPIINIT:
 	
 	BCLR DDRB, #BIT0				; comparator auslesen
 	
+CLEAR_LCD:
+    LDX #$FFFE
+	JSR LCD4x20A
+	LDX #VLINE
+	JSR LCD4x20A
+	
 
 MAIN:				; Ihr Hauptprogramm ....
 
@@ -53,7 +59,8 @@ MAIN:				; Ihr Hauptprogramm ....
 
 	JSR APPROX			; ergebnis in register A
 	
-	JSR DAOUT
+	LDY #$0207
+	JSR VoltAnz
 	
 	JMP	MAIN		; Closed Loop
 
@@ -108,7 +115,10 @@ AFTER_COND:
 	
 	
 ;Ihre konstanten Daten und Text-Strings ....
-	
+
+VLINE: .DB 2,1
+       .DW VTXT
+VTXT:  .ASCIZ "Ue: ="
 
 ; **********************************************************************************
 

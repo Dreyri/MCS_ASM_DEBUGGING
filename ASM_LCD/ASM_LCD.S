@@ -16,6 +16,7 @@ Warte1ms=	SetUp+9		; Subroutine Warte1ms (Verzögerungszeit tv=1ms)
 PORTA = $0000
 DDRA = $0002
 BIT3 = 0b00001000
+BIT4 = 0b00010000
 BIT7 = 0b10000000
 
 PORTB = $0001
@@ -37,8 +38,9 @@ INIT:			; Ihre Systeminitialisierung ....
 	
 SPIINIT:
 	BSET DDRA, #BIT3   				; set PA3 = output
+	BSET DDRA, #BIT4				; set trigger as output
 	MOVB #0b01010100, SPICR1		; SPI enable as master, l => h (CPOL=0, CPHA=1) MSB first
-	BCLR PORTA, #BIT3  				; ??
+	BCLR PORTA, #BIT3  				; clear value
 	
 	BCLR DDRB, #BIT0				; comparator auslesen
 	
@@ -47,9 +49,11 @@ MAIN:				; Ihr Hauptprogramm ....
 
     LDAA #0
 	JSR DAOUT
+    JSR TRIGGER
+
 	JSR APPROX			; ergebnis in register A
-	JSR TRIGGER
 	
+	JSR DAOUT
 	
 	JMP	MAIN		; Closed Loop
 
@@ -70,12 +74,10 @@ DAOUT:     			  		 ; send value in register A
 	BSET PORTA, #BIT3		   ; set to high to finish transfer
 	RTS
 
-TRIGGER:    ; erst daout mit 0, dann mit durchgegebenen wert
-    PSHA ; store on stack
-	LDAA #0
-	JSR DAOUT
-	PULA ; restore from stack
-	JSR DAOUT
+TRIGGER:
+    BSET PORTA, #BIT4
+	JSR Warte1ms
+	BCLR PORTA, #BIT4
 	RTS
 
 APPROX:   ; register B haelt schrittgroesse, register A haelt jetzige approximation

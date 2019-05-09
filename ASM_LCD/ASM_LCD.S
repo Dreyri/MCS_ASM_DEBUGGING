@@ -18,6 +18,10 @@ DDRA = $0002
 BIT3 = 0b00001000
 BIT7 = 0b10000000
 
+PORTB = $0001
+DDRB = $0003
+BIT0 = 0b00000001
+
 SPICR1 = $00D8
 SPICR2 = $00D9
 SPIBR = $00DA
@@ -36,16 +40,17 @@ SPIINIT:
 	MOVB #0b01010100, SPICR1		; SPI enable as master, l => h (CPOL=0, CPHA=1) MSB first
 	BCLR PORTA, #BIT3  				; ??
 	
+	BCLR DDRB, #BIT0				; comparator auslesen
+	
 
 MAIN:				; Ihr Hauptprogramm ....
-	LDAA #$FF
+
+    LDAA #0
 	JSR DAOUT
-	LDY #1
-	JSR Warte1ms
-	LDAA #$00
-	JSR DAOUT
-	LDY #1
-	JSR Warte1ms
+	JSR APPROX			; ergebnis in register A
+	JSR TRIGGER
+	
+	
 	JMP	MAIN		; Closed Loop
 
 DAOUT:     			  		 ; send value in register A
@@ -65,6 +70,41 @@ DAOUT:     			  		 ; send value in register A
 	BSET PORTA, #BIT3		   ; set to high to finish transfer
 	RTS
 
+TRIGGER:    ; erst daout mit 0, dann mit durchgegebenen wert
+    PSHA ; store on stack
+	LDAA #0
+	JSR DAOUT
+	PULA ; restore from stack
+	JSR DAOUT
+	RTS
+
+APPROX:   ; register B haelt schrittgroesse, register A haelt jetzige approximation
+    LDAB #0b10000000		   ; setze die schrittgroesse auf 128
+	LDAA #0b10000000
+	
+    LSRB  					   ; shift rechts um die schrittgroesse genauer zu machen
+APPR_LOOP:
+	PSHA 					   ; A und B auf stack zwischenspeichern
+	PSHB					  
+	JSR DAOUT                      ; daout mit unseren wert in A
+	JSR Warte1ms			   ; warte 1ms fuer den oscillator oder sowas
+	PULB
+	PULA					   ; erstelle A und B register, sie wurden kaputt gemacht in DAOUT
+	BRCLR PORTB, #BIT0, DECREASE	   ; check comparator, wenn 0 dann ist unser wert zu gross
+INCREASE:
+    ABA	  		 		       ; erhoehe a mit der schrittgroesse
+	JMP AFTER_COND
+DECREASE:
+    SBA	 		  			   ; erniedrige mit der schrittgroesse 
+AFTER_COND:
+    LSRB
+    CMPB #0 		  			   ; wenn step 0 ist quit
+	BNE APPR_LOOP
+	; A haellt schon unsere approximation
+	RTS
+    
+	
+	
 ;Ihre konstanten Daten und Text-Strings ....
 	
 

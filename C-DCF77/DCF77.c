@@ -5,6 +5,12 @@
 #include "HC12RegDefsMCS.h"
 #pragma interrupt_handler IRQ_Routine	// Interrupt Routine (vgl. HC12IntVecMCS.C)
 
+#define MINUTE_BIT_BEGIN 20
+#define MINUTE_BIT_LEN 7
+
+#define HOUR_BIT_BEGIN 28
+#define HOUR_BIT_LEN 6
+
 typedef unsigned char uint8_t;
 
 typedef uint8_t bool;
@@ -94,8 +100,48 @@ void print_time(unsigned char hr, unsigned char min, unsigned char secs)
     LCD4x20C(2, 1, time_str);
 }
 
+uint8_t parse_minute(uint8_t* buffer)
+{
+    uint8_t minute_sum = 0;
+	uint8_t i = 0;
+	
+	for (; i != MINUTE_BIT_LEN; ++i)
+	{
+	    if (buffer[i])
+		{
+		    switch (i)
+		    {
+		        case 0: // 1
+			    case 1: // 2
+			    case 2: // 4
+			    case 3: // 8
+				    minute_sum += (1 << i);
+					break;
+			    case 4: // 10
+				    minute_sum += 10;
+					break;
+			    case 5: // 20
+				    minute_sum += 20;
+					break;
+				case 6: // 40
+				    minute_sum += 40;
+					break;
+		    }
+		}
+	} 
+	
+	return minute_sum;
+}
+
+uint8_t parse_hour(uint8_t* buffer)
+{
+    return 0;
+}
+
 void parse_data(uint8_t* buffer)
 {
+    minute = parse_minute(&buffer[MINUTE_BIT_BEGIN]);
+	hour = parse_hour(&buffer[HOUR_BIT_BEGIN]);
     // TODO
 }
 

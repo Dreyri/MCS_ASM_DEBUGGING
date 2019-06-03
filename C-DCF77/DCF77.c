@@ -9,14 +9,25 @@ typedef unsigned char uint8_t;
 
 typedef uint8_t bool;
 
+typedef unsigned long long uint32_t;
+
 #define true 1
 #define false 0
+
+// this buffer can store up to 64 bits
+
+
 
 volatile uint8_t second;
 volatile uint8_t minute;
 volatile uint8_t hour;
 
+// set to true when our main loop should start the 140ms poll cycle
 volatile bool start_polling = false;
+volatile bool minute_trigger = false; // true if we reset on the next IRQ
+
+uint8_t buffer[60];
+uint8_t buffer_index;
 
 // expects a buffer of at least size 2
 void under100toa(uint8_t num, char* buffer)
@@ -56,6 +67,8 @@ unsigned char poll() {
 
     found_str[8] = data_char;
 	LCD4x20C(4, 1, found_str);
+	
+	return data_bit;
 }
 
 // time is encoded in an 8 bit uchar, lowest 2 bits seconds, then minute and last hours.
@@ -81,11 +94,17 @@ void print_time(unsigned char hr, unsigned char min, unsigned char secs)
     LCD4x20C(2, 1, time_str);
 }
 
+void parse_data(uint8_t* buffer)
+{
+    // TODO
+}
+
 
 //=== main ===========================================================================
 
 void main(void) {
-
+    uint8_t current_data_bit;
+	buffer_index = 0;
 
     // init timer easy quick mode
     TSCR1 = 0b10010000;
@@ -110,12 +129,22 @@ asm ("CLI"); // Clear Interrupt-Mask (falls IRQ Routine vorhanden)
 while(1){ 
 
         if (start_polling) {
-		    LCD4x20C(4, 1, "waiting");
-		    warte140ms();
-			LCD4x20C(4, 1, 0);
+		    if (!minute_trigger)
+			{
+		        LCD4x20C(4, 1, "waiting");
+		        warte140ms();
+			    LCD4x20C(4, 1, 0);
 			
-			poll(); // TODO assign to ring buffer
-			
+			    current_data_bit = poll(); // TODO assign to ring buffer
+				buffer[second] = current_data_bit;
+			}
+			else
+			{
+			    // minute has been triggered
+				// nothing to store
+			    parse_data(buffer);
+			}
+			minute_trigger = false;
 			start_polling = false;
 		}
 	} //Abschluss while(1)
@@ -139,24 +168,20 @@ void IRQ_Routine(void)
     
 	start_polling = true;
 	++second;
-	
-	if (second == 60)
-	{
-	    ++minute;
-		second = 0;
-		
-		if (minute == 60)
-		{
-		    ++hour;
-			minute = 0;
-		}
-	}
 
 	print_time(hour, minute, second);
 	
 	u8_to_binary(PORTA, porta_str);
 	
 	LCD4x20C(3, 1, porta_str);
+	
+	// check for minute bit
+	if ((PORTA & 0b00000010) == 0)
+	{
+	    minute_trigger = true;
+		second = -1;
+	}
+	
 	PORTA &= ~0b00001000;
 	PORTA |= 0b00001000;
 }

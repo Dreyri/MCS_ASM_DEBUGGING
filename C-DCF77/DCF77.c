@@ -39,7 +39,7 @@ void u8_to_binary(uint8_t number, char* buffer)
 
 void warte140ms() 
 {
-    
+    TC0 = TCNT + 125 * 140;
 	while ((TFLG1 & 1) == 0) {}
 }
 

@@ -99,6 +99,7 @@ while(1){
 		    LCD4x20C(4, 1, "waiting");
 		    warte140ms();
 			LCD4x20C(4, 0, 0);
+			start_polling = false;
 		}
 	} //Abschluss while(1)
 

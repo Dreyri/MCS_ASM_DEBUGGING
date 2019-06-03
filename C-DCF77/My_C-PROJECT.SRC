@@ -1,0 +1,7 @@
+[Files]
+HC12IntVecMCS.c
+LCD4X20CI-4Bit.S
+DCF77.c
+[Headers]
+HC12RegDefsMCS.h
+[Documents]

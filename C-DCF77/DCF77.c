@@ -43,9 +43,20 @@ void warte140ms()
 	while ((TFLG1 & 1) == 0) {}
 }
 
+
 //=== Funktionsdeklarationen ===
 // Display:
 int LCD4x20C (int LineSel, int CsrPos, char* ChrPntr); //LCD-Display
+
+
+unsigned char poll() {
+    char found_str[] = "found - x";
+	unsigned char data_bit = (PORTA & 0b00000001);
+	unsigned char data_char = '0' + data_bit;
+
+    found_str[8] = data_char;
+	LCD4x20C(4, 1, found_str);
+}
 
 // time is encoded in an 8 bit uchar, lowest 2 bits seconds, then minute and last hours.
 // with upper 2 bits as don't care
@@ -74,6 +85,8 @@ void print_time(unsigned char hr, unsigned char min, unsigned char secs)
 //=== main ===========================================================================
 
 void main(void) {
+
+
     // init timer easy quick mode
     TSCR1 = 0b10010000;
 	TIOS = 0b00000001;
@@ -95,10 +108,14 @@ asm ("CLI"); // Clear Interrupt-Mask (falls IRQ Routine vorhanden)
 //=== Hauptroutine =============================================
 
 while(1){ 
+
         if (start_polling) {
 		    LCD4x20C(4, 1, "waiting");
 		    warte140ms();
-			LCD4x20C(4, 0, 0);
+			LCD4x20C(4, 1, 0);
+			
+			poll(); // TODO assign to ring buffer
+			
 			start_polling = false;
 		}
 	} //Abschluss while(1)

@@ -42,6 +42,7 @@ void under100toa(uint8_t num, char* buffer)
 	buffer[1] = '0' + (num % 10);
 }
 
+// converts an 8 bit unsigned number to a character buffer, buffer must hold at least 8 bits
 void u8_to_binary(uint8_t number, char* buffer)
 {
     buffer[7] = '0' + (number & 1);
@@ -134,6 +135,7 @@ uint8_t parse_minute(uint8_t* buffer)
 	return minute_sum;
 }
 
+// read the 
 uint8_t parse_hour(uint8_t* buffer)
 {
     uint8_t hour_sum = 0;
@@ -163,11 +165,11 @@ uint8_t parse_hour(uint8_t* buffer)
     return hour_sum;
 }
 
+// parse the contents of the buffer. currently get minutes and hours.
 void parse_data(uint8_t* buffer)
 {
     minute = parse_minute(&buffer[MINUTE_BIT_BEGIN]);
 	hour = parse_hour(&buffer[HOUR_BIT_BEGIN]);
-    // TODO
 }
 
 
@@ -198,9 +200,9 @@ asm ("CLI"); // Clear Interrupt-Mask (falls IRQ Routine vorhanden)
 //=== Hauptroutine =============================================
 
 while(1){ 
-
+        // we can finally start checking for our next data bit
         if (start_polling) {
-		    if (!minute_trigger)
+		    if (!minute_trigger) // no minute trigger detected, we can get data
 			{
 		        LCD4x20C(4, 1, "waiting");
 		        warte140ms();
@@ -209,10 +211,9 @@ while(1){
 			    current_data_bit = poll();
 				buffer[second] = current_data_bit;
 			}
-			else
+			else // minute trigger detected, no data will be received and process buffer
 			{
-			    // minute has been triggered
-				// nothing to store
+			    // after parse the buffer will be reused for the next minute
 			    parse_data(buffer);
 			}
 			minute_trigger = false;
@@ -233,6 +234,10 @@ while(1){
 
 //=== IRQ Interrupt Routine ==========================================================
 
+// this interrupt routine sets start_polling and minute_trigger for when these
+// events are caught. start_polling indicates to the main loop that it can start
+// its 140ms wait to get the data. minute trigger indicates to the main loop that
+// it can start processing the data and show the new minute and hour count.
 void IRQ_Routine(void)
 {
 	char porta_str[] = "12345678";

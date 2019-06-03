@@ -5,10 +5,10 @@
 #include "HC12RegDefsMCS.h"
 #pragma interrupt_handler IRQ_Routine	// Interrupt Routine (vgl. HC12IntVecMCS.C)
 
-#define MINUTE_BIT_BEGIN 20
+#define MINUTE_BIT_BEGIN 21
 #define MINUTE_BIT_LEN 7
 
-#define HOUR_BIT_BEGIN 28
+#define HOUR_BIT_BEGIN 29
 #define HOUR_BIT_LEN 6
 
 typedef unsigned char uint8_t;
@@ -68,13 +68,14 @@ int LCD4x20C (int LineSel, int CsrPos, char* ChrPntr); //LCD-Display
 
 unsigned char poll() {
     char found_str[] = "found - x";
-	unsigned char data_bit = (PORTA & 0b00000001);
-	unsigned char data_char = '0' + data_bit;
+	uint8_t data_bit = (PORTA & 0b00000001);
+	unsigned char inv_data_bit = data_bit ^ 0b00000001;
+	unsigned char data_char = '0' + inv_data_bit;
 
     found_str[8] = data_char;
 	LCD4x20C(4, 1, found_str);
 	
-	return data_bit;
+	return inv_data_bit;
 }
 
 // time is encoded in an 8 bit uchar, lowest 2 bits seconds, then minute and last hours.
@@ -135,7 +136,31 @@ uint8_t parse_minute(uint8_t* buffer)
 
 uint8_t parse_hour(uint8_t* buffer)
 {
-    return 0;
+    uint8_t hour_sum = 0;
+    uint8_t i = 0;
+	
+	for (; i != HOUR_BIT_LEN; ++i)
+	{
+	    if (buffer[i])
+		{
+	        switch(i)
+		    {
+		        case 0:
+				case 1:
+				case 2:
+				case 3:
+				    hour_sum += (1 << i);
+					break;
+				case 4:
+				    hour_sum += 10;
+					break;
+				case 5:
+				    hour_sum += 20;
+					break;
+		    }
+		}
+	}
+    return hour_sum;
 }
 
 void parse_data(uint8_t* buffer)
@@ -181,7 +206,7 @@ while(1){
 		        warte140ms();
 			    LCD4x20C(4, 1, 0);
 			
-			    current_data_bit = poll(); // TODO assign to ring buffer
+			    current_data_bit = poll();
 				buffer[second] = current_data_bit;
 			}
 			else

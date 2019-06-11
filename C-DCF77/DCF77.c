@@ -200,6 +200,10 @@ asm ("CLI"); // Clear Interrupt-Mask (falls IRQ Routine vorhanden)
 //=== Hauptroutine =============================================
 
 while(1){ 
+        if (PORTA & 0b00000100)
+		{
+		    LCD4x20C(2, 1, "Transmission error");
+		}
         // we can finally start checking for our next data bit
         if (start_polling) {
 		    if (!minute_trigger) // no minute trigger detected, we can get data

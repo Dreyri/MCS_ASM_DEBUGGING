@@ -42,6 +42,7 @@ void under100toa(uint8_t num, char* buffer)
 	buffer[1] = '0' + (num % 10);
 }
 
+// converts an 8 bit unsigned number to a character buffer, buffer must hold at least 8 bits
 void u8_to_binary(uint8_t number, char* buffer)
 {
     buffer[7] = '0' + (number & 1);
@@ -134,6 +135,7 @@ uint8_t parse_minute(uint8_t* buffer)
 	return minute_sum;
 }
 
+// read the 
 uint8_t parse_hour(uint8_t* buffer)
 {
     uint8_t hour_sum = 0;

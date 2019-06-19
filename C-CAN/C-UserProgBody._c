@@ -74,7 +74,7 @@ void init_can(void)
 	CANIDAC = 0b00010000; // 4x 16bit acceptance filter
 	
 	CANIDAR0 = 0b00001100; // AkFilter1
-	CANIDAR1 = 0b10100000; // ID = 100
+	CANIDAR1 = 0b10000000; // ID = 100
 	
 	CANIDMR0 = 0b00000000; // alle 11 bit ueberpruefen + IDE + RTR
 	CANIDMR1 = 0b00000111;
@@ -120,7 +120,7 @@ while(1){
 		    if (message.length < old_length)
 			{
 			    // clear the data line or we'll get old data
-				LCD4x20C(2, 7, clear_data);
+				LCD4x20C(2, 7, (char*) clear_data);
 			}
 			
 			old_length = message.length;

@@ -74,7 +74,7 @@ void init_can(void)
 	CANIDAC = 0b00010000; // 4x 16bit acceptance filter
 	
 	CANIDAR0 = 0b00001100; // AkFilter1
-	CANIDAR1 = 0b10100000; // ID = 100
+	CANIDAR1 = 0b10000000; // ID = 100
 	
 	CANIDMR0 = 0b00000000; // alle 11 bit ueberpruefen + IDE + RTR
 	CANIDMR1 = 0b00000111;
@@ -139,6 +139,8 @@ while(1){
 			LCD4x20C(2, 7, buffer);
 			itoa(message.length, buffer);
 			LCD4x20C(3, 7, buffer);
+			
+			caniflag = 0; // reset can interrupt flag
 		}
 	
 	} //Abschluss while(1)
